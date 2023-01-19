@@ -1,3 +1,3 @@
 export function Habits() {
-  return <h1>Habits</h1>
+  return <div className="text-red-500">Habits</div>
 }
