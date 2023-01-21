@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
+import dayjs from 'dayjs'
+import { fetchSummary } from '../usecases/fetchSummary'
 import { generateDatesFromYearBeginning } from '../utils/generateDatesFromYearBeginning'
 import { HabitDay } from './HabitDay'
 
@@ -8,6 +11,10 @@ const minimunSummaryDatesSize = 18 * 7
 const amountOfDaysToFill = minimunSummaryDatesSize - summaryDates.length
 
 export function SummaryTable() {
+  const { data: summary, isLoading } = useQuery(['summary'], fetchSummary)
+
+  if (isLoading || !summary) return null
+
   return (
     <div className="w-full flex">
       <div className="grid grid-rows-7 grid-flow-row gap-3">
@@ -22,13 +29,20 @@ export function SummaryTable() {
       </div>
 
       <div className="grid grid-rows-7 grid-flow-col gap-3">
-        {summaryDates.map((date) => (
-          <HabitDay
-            amount={5}
-            completed={Math.round(Math.random() * 5)}
-            key={date.toISOString()}
-          />
-        ))}
+        {summaryDates.map((date) => {
+          const dayInSummary = summary.find((day) =>
+            dayjs(date).isSame(day.date, 'day'),
+          )
+
+          return (
+            <HabitDay
+              key={date.toISOString()}
+              date={date}
+              amount={dayInSummary?.amount}
+              completed={dayInSummary?.completed}
+            />
+          )
+        })}
 
         {amountOfDaysToFill > 0 &&
           Array.from({ length: amountOfDaysToFill }).map((_, index) => (
